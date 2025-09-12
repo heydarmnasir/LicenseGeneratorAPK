@@ -1,0 +1,36 @@
+﻿<Window x:Class="LicenseGeneratorAPK.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="License Generator" Height="575" Width="600" ResizeMode="NoResize">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Vertical" Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock Text="Device ID:" FontWeight="Bold"/>
+            <TextBox Name="DeviceIdTB" Width="300"/>
+            <TextBlock Text="Start Date:" FontWeight="Bold" Margin="0,10,0,0"/>
+            <DatePicker Name="StartDatePicker"/>
+            <TextBlock Text="Subscription Plan:" FontWeight="Bold" Margin="0,10,0,0"/>
+            <ComboBox Name="PlanCombo" Width="150"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,10,0,10" HorizontalAlignment="Left">
+            <Button Name="GenerateKeysButton" Content="تولید کلید RSA" Width="150" Click="GenerateKeysButton_Click"/>
+            <Button Name="GenerateLicenseButton" Content="تولید لایسنس" Width="150" Click="GenerateLicenseButton_Click"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Vertical" Margin="0,10,0,10">
+            <TextBlock Text="Public Key:" FontWeight="Bold"/>
+            <TextBox Name="PublicKeyTB" Width="550" Height="80" TextWrapping="Wrap" AcceptsReturn="True"/>
+            <TextBlock Text="Private Key:" FontWeight="Bold" Margin="0,10,0,0"/>
+            <TextBox Name="PrivateKeyTB" Width="550" Height="80" TextWrapping="Wrap" AcceptsReturn="True"/>
+            <TextBlock Text="Signed License:" FontWeight="Bold" Margin="0,10,0,0"/>
+            <TextBox Name="SignedLicenseTB" Width="550" Height="80" TextWrapping="Wrap" AcceptsReturn="True"/>
+        </StackPanel>
+    </Grid>
+</Window>
