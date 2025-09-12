@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 
 namespace LicenseGeneratorAPK.Helpers
 {
@@ -17,10 +18,13 @@ namespace LicenseGeneratorAPK.Helpers
 
         public static byte[] SignData(byte[] data, string privateKeyXml)
         {
+            if (string.IsNullOrWhiteSpace(privateKeyXml))
+                throw new ArgumentNullException(nameof(privateKeyXml), "Private key XML is null or empty. Make sure you generated or loaded the private key.");
+
             using (var rsa = new RSACryptoServiceProvider())
             {
                 rsa.PersistKeyInCsp = false;
-                rsa.FromXmlString(privateKeyXml);
+                rsa.FromXmlString(privateKeyXml);   // اینجا دیگر null نیست
                 return rsa.SignData(data, CryptoConfig.MapNameToOID("SHA256"));
             }
         }

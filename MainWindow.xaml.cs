@@ -17,6 +17,13 @@ namespace LicenseGeneratorAPK
             PlanCombo.ItemsSource = new[] { "3 ماهه", "6 ماهه", "12 ماهه" };
             PlanCombo.SelectedIndex = 0;
             StartDatePicker.SelectedDate = DateTime.Today;
+
+            // تلاش برای بارگذاری کلید خصوصی ذخیره شده
+            _privateKey = KeyStorage.LoadPrivateKeyEncrypted();
+            if (!string.IsNullOrWhiteSpace(_privateKey))
+            {
+                PrivateKeyTB.Text = _privateKey;
+            }
         }
 
         private void GenerateKeysButton_Click(object sender, RoutedEventArgs e)
@@ -24,7 +31,12 @@ namespace LicenseGeneratorAPK
             (_publicKey, _privateKey) = RsaKeyHelper.GenerateKeys();
             PublicKeyTB.Text = _publicKey;
             PrivateKeyTB.Text = _privateKey;
-            MessageBox.Show("جفت کلید RSA تولید شد.\nPublic Key برای اپ موبایل و Private Key برای امضا استفاده می‌شود.",
+
+            // ذخیره امن کلید خصوصی
+            KeyStorage.SavePrivateKeyEncrypted(_privateKey);
+
+            MessageBox.Show("جفت کلید RSA تولید شد و کلید خصوصی ذخیره شد.\n" +
+                "Public Key را در اپ موبایل قرار دهید و Private Key برای امضا استفاده می‌شود.",
                 "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -43,14 +55,30 @@ namespace LicenseGeneratorAPK
                 return;
             }
 
+            // اطمینان از اینکه کلید خصوصی داریم
+            if (string.IsNullOrWhiteSpace(_privateKey))
+            {
+                _privateKey = KeyStorage.LoadPrivateKeyEncrypted();
+                if (string.IsNullOrWhiteSpace(_privateKey))
+                {
+                    MessageBox.Show("کلید خصوصی موجود نیست! ابتدا جفت کلید تولید کنید.",
+                        "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+
             DateTime startDate = StartDatePicker.SelectedDate.Value;
             DateTime endDate = startDate;
 
             switch (PlanCombo.SelectedItem.ToString())
             {
-                case "3 ماهه": endDate = startDate.AddMonths(3); break;
-                case "6 ماهه": endDate = startDate.AddMonths(6); break;
-                case "12 ماهه": endDate = startDate.AddYears(1); break;
+                //case "3 ماهه": endDate = startDate.AddMonths(3); break;
+                //case "6 ماهه": endDate = startDate.AddMonths(6); break;
+                //case "12 ماهه": endDate = startDate.AddYears(1); break;
+
+                case "3 ماهه": endDate = startDate.AddMinutes(3); break;
+                case "6 ماهه": endDate = startDate.AddMinutes(6); break;
+                case "12 ماهه": endDate = startDate.AddMinutes(12); break;
             }
 
             var payload = new
@@ -65,13 +93,13 @@ namespace LicenseGeneratorAPK
             byte[] payloadBytes = Encoding.UTF8.GetBytes(jsonPayload);
 
             // امضا با کلید خصوصی
-            byte[] signature = Helpers.RsaKeyHelper.SignData(payloadBytes, _privateKey);
+            byte[] signature = RsaKeyHelper.SignData(payloadBytes, _privateKey);
 
-            // Combine: Base64(payload) + "." + Base64(signature)
+            // ترکیب Payload + Signature
             string signedLicense = Convert.ToBase64String(payloadBytes) + "." + Convert.ToBase64String(signature);
 
             SignedLicenseTB.Text = signedLicense;
-            MessageBox.Show("لایسنس تولید و امضا شد. می‌توانید به اپ موبایل ارسال کنید.", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("لایسنس تولید و امضا شد ✅", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }
