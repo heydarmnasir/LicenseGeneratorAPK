@@ -18,21 +18,19 @@ namespace LicenseGeneratorAPK
             PlanCombo.SelectedIndex = 0;
             StartDatePicker.SelectedDate = DateTime.Today;
 
-            // تلاش برای بارگذاری کلید خصوصی ذخیره شده
+            // بارگذاری کلید خصوصی ذخیره شده
             _privateKey = KeyStorage.LoadPrivateKeyEncrypted();
             if (!string.IsNullOrWhiteSpace(_privateKey))
-            {
                 PrivateKeyTB.Text = _privateKey;
-            }
         }
 
         private void GenerateKeysButton_Click(object sender, RoutedEventArgs e)
         {
             (_publicKey, _privateKey) = RsaKeyHelper.GenerateKeys();
+
             PublicKeyTB.Text = _publicKey;
             PrivateKeyTB.Text = _privateKey;
 
-            // ذخیره امن کلید خصوصی
             KeyStorage.SavePrivateKeyEncrypted(_privateKey);
 
             MessageBox.Show("جفت کلید RSA تولید شد و کلید خصوصی ذخیره شد.\n" +
@@ -55,7 +53,6 @@ namespace LicenseGeneratorAPK
                 return;
             }
 
-            // اطمینان از اینکه کلید خصوصی داریم
             if (string.IsNullOrWhiteSpace(_privateKey))
             {
                 _privateKey = KeyStorage.LoadPrivateKeyEncrypted();
@@ -72,13 +69,9 @@ namespace LicenseGeneratorAPK
 
             switch (PlanCombo.SelectedItem.ToString())
             {
-                //case "3 ماهه": endDate = startDate.AddMonths(3); break;
-                //case "6 ماهه": endDate = startDate.AddMonths(6); break;
-                //case "12 ماهه": endDate = startDate.AddYears(1); break;
-
-                case "3 ماهه": endDate = startDate.AddMinutes(3); break;
-                case "6 ماهه": endDate = startDate.AddMinutes(6); break;
-                case "12 ماهه": endDate = startDate.AddMinutes(12); break;
+                case "1 ماهه": endDate = startDate.AddMonths(1); break;
+                case "3 ماهه": endDate = startDate.AddMonths(3); break;
+                case "12 ماهه": endDate = startDate.AddYears(1); break;
             }
 
             var payload = new
@@ -95,11 +88,17 @@ namespace LicenseGeneratorAPK
             // امضا با کلید خصوصی
             byte[] signature = RsaKeyHelper.SignData(payloadBytes, _privateKey);
 
+            // Base64 بدون newline و space
+            string payloadBase64 = Convert.ToBase64String(payloadBytes, Base64FormattingOptions.None);
+            string signatureBase64 = Convert.ToBase64String(signature, Base64FormattingOptions.None);
+
             // ترکیب Payload + Signature
-            string signedLicense = Convert.ToBase64String(payloadBytes) + "." + Convert.ToBase64String(signature);
+            string signedLicense = $"{payloadBase64}.{signatureBase64}";
 
             SignedLicenseTB.Text = signedLicense;
-            MessageBox.Show("لایسنس تولید و امضا شد ✅", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            MessageBox.Show("لایسنس تولید و امضا شد ✅\nاین کلید آماده کپی در اپ موبایل است.",
+                "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }
