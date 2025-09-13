@@ -14,7 +14,7 @@ namespace LicenseGeneratorAPK
         public MainWindow()
         {
             InitializeComponent();
-            PlanCombo.ItemsSource = new[] { "3 ماهه", "6 ماهه", "12 ماهه" };
+            PlanCombo.ItemsSource = new[] { "1 ماهه", "3 ماهه", "12 ماهه" };
             PlanCombo.SelectedIndex = 0;
             StartDatePicker.SelectedDate = DateTime.Today;
 
